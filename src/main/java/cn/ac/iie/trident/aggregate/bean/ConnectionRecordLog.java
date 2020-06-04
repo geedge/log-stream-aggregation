@@ -1,28 +1,45 @@
-package cn.ac.iie.bean;
+package cn.ac.iie.trident.aggregate.bean;
 
 /**
- * @ClassNameKeyTuple
+ * @ClassNameConnectionRecordLog
  * @Author lixkvip@126.com
- * @Date2020/5/27 16:18
+ * @Date2020/5/28 13:44
  * @Version V1.0
  **/
-public class KeyTuple {
+public class ConnectionRecordLog {
 
-     private int common_policy_id;
-     private int common_action;
-     private String common_sub_action;
-     private String common_client_ip;
-     private String common_client_location;
-     private String common_sled_ip;
-     private String common_device_id;
-     private String common_subscriber_id;
-     private String common_server_ip;
-     private String common_server_location;
-     private int common_server_port;
-     private String common_l4_protocol;
-     private String http_domain;
-     private String ssl_sni;
+    //key
+    private long common_recv_time;
+    private int common_policy_id;
+    private int common_action;
+    private String common_sub_action;
+    private String common_client_ip;
+    private String common_client_location;
+    private String common_sled_ip;
+    private String common_device_id;
+    private String common_subscriber_id;
+    private String common_server_ip;
+    private String common_server_location;
+    private int common_server_port;
+    private String common_l4_protocol;
+    private String http_domain;
+    private String ssl_sni;
 
+    //value
+    private long common_sessions;
+    private long common_c2s_pkt_num;
+    private long common_s2c_pkt_num;
+    private long common_c2s_byte_num;
+    private long common_s2c_byte_num;
+
+
+    public long getCommon_recv_time() {
+        return common_recv_time;
+    }
+
+    public void setCommon_recv_time(long common_recv_time) {
+        this.common_recv_time = common_recv_time;
+    }
 
     public int getCommon_policy_id() {
         return common_policy_id;
@@ -134,5 +151,45 @@ public class KeyTuple {
 
     public void setSsl_sni(String ssl_sni) {
         this.ssl_sni = ssl_sni;
+    }
+
+    public long getCommon_sessions() {
+        return common_sessions;
+    }
+
+    public void setCommon_sessions(long common_sessions) {
+        this.common_sessions = common_sessions;
+    }
+
+    public long getCommon_c2s_pkt_num() {
+        return common_c2s_pkt_num;
+    }
+
+    public void setCommon_c2s_pkt_num(long common_c2s_pkt_num) {
+        this.common_c2s_pkt_num = common_c2s_pkt_num;
+    }
+
+    public long getCommon_s2c_pkt_num() {
+        return common_s2c_pkt_num;
+    }
+
+    public void setCommon_s2c_pkt_num(long common_s2c_pkt_num) {
+        this.common_s2c_pkt_num = common_s2c_pkt_num;
+    }
+
+    public long getCommon_c2s_byte_num() {
+        return common_c2s_byte_num;
+    }
+
+    public void setCommon_c2s_byte_num(long common_c2s_byte_num) {
+        this.common_c2s_byte_num = common_c2s_byte_num;
+    }
+
+    public long getCommon_s2c_byte_num() {
+        return common_s2c_byte_num;
+    }
+
+    public void setCommon_s2c_byte_num(long common_s2c_byte_num) {
+        this.common_s2c_byte_num = common_s2c_byte_num;
     }
 }

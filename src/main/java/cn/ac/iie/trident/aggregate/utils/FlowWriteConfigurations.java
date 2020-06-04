@@ -1,4 +1,4 @@
-package cn.ac.iie.utils.system;
+package cn.ac.iie.trident.aggregate.utils;
 
 import java.util.Properties;
 

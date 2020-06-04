@@ -1,10 +1,9 @@
-package cn.ac.iie.utils.kafka;
+package cn.ac.iie.trident.aggregate.utils;
 
-import cn.ac.iie.common.FlowWriteConfig;
+
 import org.apache.kafka.clients.producer.*;
 import org.apache.log4j.Logger;
 
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -39,10 +38,9 @@ public class KafkaLogNtc {
     }
 
 
-    public void sendMessage(List<String> list) {
+    public void sendMessage(String message) {
         final int[] errorSum = {0};
-        for (String value : list) {
-            kafkaProducer.send(new ProducerRecord<>(FlowWriteConfig.RESULTS_OUTPUT_TOPIC, value), new Callback() {
+            kafkaProducer.send(new ProducerRecord<>(FlowWriteConfig.RESULTS_OUTPUT_TOPIC, message), new Callback() {
                 @Override
                 public void onCompletion(RecordMetadata metadata, Exception exception) {
                     if (exception != null) {
@@ -51,10 +49,7 @@ public class KafkaLogNtc {
                     }
                 }
             });
-            if (errorSum[0] > FlowWriteConfig.MAX_FAILURE_NUM) {
-                list.clear();
-            }
-        }
+
         kafkaProducer.flush();
         logger.debug("Log sent to National Center successfully!!!!!");
     }
