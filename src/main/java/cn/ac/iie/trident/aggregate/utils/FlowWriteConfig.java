@@ -23,6 +23,10 @@ public class FlowWriteConfig {
     public static final Integer MAX_FAILURE_NUM = FlowWriteConfigurations.getIntProperty(0, "max.failure.num");
     public static final String MAIL_DEFAULT_CHARSET = FlowWriteConfigurations.getStringProperty(0, "mail.default.charset");
 
+
+    public static final Integer AGG_TIME = FlowWriteConfigurations.getIntProperty(0, "agg.time");
+
+
     /**
      * kafka
      */
@@ -35,8 +39,6 @@ public class FlowWriteConfig {
     public static final String KAFKA_TOPIC = FlowWriteConfigurations.getStringProperty(0, "kafka.topic");
     public static final String AUTO_OFFSET_RESET = FlowWriteConfigurations.getStringProperty(0, "auto.offset.reset");
     public static final String KAFKA_COMPRESSION_TYPE = FlowWriteConfigurations.getStringProperty(0, "kafka.compression.type");
-
-    public static final String IP_LIBRARY = FlowWriteConfigurations.getStringProperty(0, "ip.library");
 
     /**
      * http

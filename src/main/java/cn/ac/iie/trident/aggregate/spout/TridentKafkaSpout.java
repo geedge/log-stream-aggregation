@@ -29,6 +29,7 @@ public class TridentKafkaSpout {
             TridentKafkaConfig kafkaConfig = new TridentKafkaConfig(zkHosts, FlowWriteConfig.KAFKA_TOPIC);
             kafkaConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
             kafkaConfig.startOffsetTime = -1L;
+            kafkaConfig.socketTimeoutMs=60000;
 
             //不透明事务型Spout
             opaqueTridentKafkaSpout = new OpaqueTridentKafkaSpout(kafkaConfig);

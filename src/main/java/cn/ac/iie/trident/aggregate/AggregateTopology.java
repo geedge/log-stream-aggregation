@@ -22,6 +22,9 @@ import java.util.concurrent.TimeUnit;
  **/
 public class AggregateTopology {
 
+
+
+
     public static void main(String[] args) {
         //TODO 创建一个topo任务
         TridentTopology topology = new TridentTopology();
@@ -29,16 +32,26 @@ public class AggregateTopology {
         OpaqueTridentKafkaSpout opaqueTridentKafkaSpout = TridentKafkaSpout.getInstance();
 
         topology.newStream("kafka2storm_opaqueTrident", opaqueTridentKafkaSpout)
-                .parallelismHint(FlowWriteConfig.SPOUT_PARALLELISM)
+                .name("one")
+                .parallelismHint(FlowWriteConfig.SPOUT_PARALLELISM) //spout的并行度
+                .name("two")
                 .each(new Fields("str"), new ParseJson2KV(), new Fields("key", "value"))
-                .parallelismHint(FlowWriteConfig.DATACENTER_BOLT_PARALLELISM)
-                .slidingWindow(new BaseWindowedBolt.Duration(10, TimeUnit.SECONDS), new BaseWindowedBolt.Duration(10, TimeUnit.SECONDS), new InMemoryWindowsStoreFactory(), new Fields("key", "value"), new AggCount(), new Fields("map"))
-                .each(new Fields("map"), new KafkaBolt(), new Fields());
+                .parallelismHint(FlowWriteConfig.DATACENTER_BOLT_PARALLELISM) //处理数据的并行度
+                .name("three")
+                .slidingWindow(new BaseWindowedBolt.Duration(FlowWriteConfig.AGG_TIME, TimeUnit.SECONDS), new BaseWindowedBolt.Duration(FlowWriteConfig.AGG_TIME, TimeUnit.SECONDS), new InMemoryWindowsStoreFactory(), new Fields("key", "value"), new AggCount(), new Fields("map"))
+                .name("four")
+                .each(new Fields("map"), new KafkaBolt(), new Fields())
+                .name("five")
+                .parallelismHint(FlowWriteConfig.KAFKA_BOLT_PARALLELISM) //写到kafka的并行度
+                .name("six");
 
         Config config = new Config();
+//        config.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS, 10);
         config.setDebug(false);
-        config.setNumWorkers(5);
+        config.setNumWorkers(FlowWriteConfig.TOPOLOGY_WORKERS); //worker的数量
         LocalCluster cluster = new LocalCluster();
+
+
         cluster.submitTopology("trident-wordcount", config, topology.build());
 //        StormSubmitter.submitTopology("kafka2storm_opaqueTrident_topology", config,topology.build());
     }
