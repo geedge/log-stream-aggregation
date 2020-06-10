@@ -1,0 +1,95 @@
+package cn.ac.iie.origion.topology;
+
+import cn.ac.iie.origion.bolt.MyWindowBolt;
+import cn.ac.iie.origion.bolt.NtcLogSendBolt;
+import cn.ac.iie.origion.spout.CustomizedKafkaSpout;
+import cn.ac.iie.origion.utils.FlowWriteConfig;
+import org.apache.log4j.Logger;
+import org.apache.storm.Config;
+import org.apache.storm.generated.AlreadyAliveException;
+import org.apache.storm.generated.AuthorizationException;
+import org.apache.storm.generated.InvalidTopologyException;
+import org.apache.storm.topology.TopologyBuilder;
+import org.apache.storm.topology.base.BaseWindowedBolt;
+
+import java.util.concurrent.TimeUnit;
+
+
+/**
+ * Storm程序主类
+ *
+ * @author Administrator
+ */
+
+public class LogFlowWriteTopology {
+    private static Logger logger = Logger.getLogger(LogFlowWriteTopology.class);
+    private final String topologyName;
+    private final Config topologyConfig;
+    private TopologyBuilder builder;
+
+    private LogFlowWriteTopology() {
+        this(LogFlowWriteTopology.class.getSimpleName());
+    }
+
+    private LogFlowWriteTopology(String topologyName) {
+        this.topologyName = topologyName;
+        topologyConfig = createTopologConfig();
+    }
+
+    private Config createTopologConfig() {
+        Config conf = new Config();
+        conf.setDebug(false);
+        conf.setMessageTimeoutSecs(60);
+        conf.setMaxSpoutPending(150000);
+        conf.setNumAckers(3);
+        return conf;
+    }
+
+    private void runLocally() throws InterruptedException {
+        topologyConfig.setMaxTaskParallelism(1);
+        StormRunner.runTopologyLocally(builder, topologyName, topologyConfig, 600);
+    }
+
+    private void runRemotely() throws AlreadyAliveException, InvalidTopologyException, AuthorizationException {
+        topologyConfig.setNumWorkers(FlowWriteConfig.TOPOLOGY_WORKERS);
+        //设置过高会导致很多问题，如心跳线程饿死、吞吐量大幅下跌
+        topologyConfig.put(Config.TOPOLOGY_EXECUTOR_RECEIVE_BUFFER_SIZE, 8);
+        StormRunner.runTopologyRemotely(builder, topologyName, topologyConfig);
+    }
+
+    private void buildTopology() {
+        builder = new TopologyBuilder();
+        builder.setSpout("LogFlowWriteSpout", new CustomizedKafkaSpout(), 3);
+        builder.setBolt("TEST-CONN", new MyWindowBolt()
+                .withWindow(new BaseWindowedBolt.Duration(30, TimeUnit.SECONDS),
+                        new BaseWindowedBolt.Duration(30, TimeUnit.SECONDS)),FlowWriteConfig.DATACENTER_BOLT_PARALLELISM)
+                .localOrShuffleGrouping("LogFlowWriteSpout");
+
+//        builder.setBolt("TEST-CONN", new AggregateBolt(),3).localOrShuffleGrouping("LogFlowWriteSpout");
+//        builder.setBolt("KAKFA-CONN", new PrintBolt(),3).localOrShuffleGrouping("TEST-CONN");
+        builder.setBolt("KAKFA-CONN", new NtcLogSendBolt(),FlowWriteConfig.KAFKA_BOLT_PARALLELISM).localOrShuffleGrouping("TEST-CONN");
+    }
+
+    public static void main(String[] args) throws Exception {
+        LogFlowWriteTopology csst = null;
+        boolean runLocally = true;
+        String parameter = "remote";
+        int size = 2;
+        if (args.length >= size && parameter.equalsIgnoreCase(args[1])) {
+            runLocally = false;
+            csst = new LogFlowWriteTopology(args[0]);
+        } else {
+            csst = new LogFlowWriteTopology();
+        }
+
+        csst.buildTopology();
+
+        if (runLocally) {
+            logger.info("执行本地模式...");
+            csst.runLocally();
+        } else {
+            logger.info("执行远程部署模式...");
+            csst.runRemotely();
+        }
+    }
+}

@@ -1,14 +1,13 @@
-package cn.ac.iie.trident.aggregate.bean;
+package cn.ac.iie.origion.bean;
 
 /**
- * @ClassNameConnectionRecordLog
+ * @ClassNameKeyBean
  * @Author lixkvip@126.com
- * @Date2020/5/28 13:44
+ * @Date2020/6/3 18:52
  * @Version V1.0
  **/
-public class ConnectionRecordLog {
+public class KeyBean {
 
-    //key
     private long common_recv_time;
     private int common_policy_id;
     private int common_action;
@@ -24,14 +23,6 @@ public class ConnectionRecordLog {
     private String common_l4_protocol;
     private String http_domain;
     private String ssl_sni;
-
-    //value
-    private long common_sessions;
-    private long common_c2s_pkt_num;
-    private long common_s2c_pkt_num;
-    private long common_c2s_byte_num;
-    private long common_s2c_byte_num;
-
 
     public long getCommon_recv_time() {
         return common_recv_time;
@@ -153,43 +144,33 @@ public class ConnectionRecordLog {
         this.ssl_sni = ssl_sni;
     }
 
-    public long getCommon_sessions() {
-        return common_sessions;
+    @Override
+    public int hashCode() {
+
+        return ("" + getCommon_recv_time() + getCommon_policy_id() + getCommon_action() + getCommon_sub_action() + getCommon_client_ip() + getCommon_client_location() + getCommon_sled_ip() + getCommon_device_id() + getCommon_subscriber_id() + getCommon_server_ip() + getCommon_server_location() + getCommon_server_port() + getCommon_l4_protocol() + getHttp_domain() + getSsl_sni()).hashCode();
+
     }
 
-    public void setCommon_sessions(long common_sessions) {
-        this.common_sessions = common_sessions;
-    }
-
-    public long getCommon_c2s_pkt_num() {
-        return common_c2s_pkt_num;
-    }
-
-    public void setCommon_c2s_pkt_num(long common_c2s_pkt_num) {
-        this.common_c2s_pkt_num = common_c2s_pkt_num;
-    }
-
-    public long getCommon_s2c_pkt_num() {
-        return common_s2c_pkt_num;
-    }
-
-    public void setCommon_s2c_pkt_num(long common_s2c_pkt_num) {
-        this.common_s2c_pkt_num = common_s2c_pkt_num;
-    }
-
-    public long getCommon_c2s_byte_num() {
-        return common_c2s_byte_num;
-    }
-
-    public void setCommon_c2s_byte_num(long common_c2s_byte_num) {
-        this.common_c2s_byte_num = common_c2s_byte_num;
-    }
-
-    public long getCommon_s2c_byte_num() {
-        return common_s2c_byte_num;
-    }
-
-    public void setCommon_s2c_byte_num(long common_s2c_byte_num) {
-        this.common_s2c_byte_num = common_s2c_byte_num;
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof KeyBean) {
+            KeyBean keyBean = (KeyBean) o;
+            return (this.getCommon_recv_time()==(keyBean.getCommon_recv_time()) &&
+                    this.getCommon_policy_id()==(keyBean.getCommon_policy_id()) &&
+                    this.getCommon_action()==(keyBean.getCommon_action()) &&
+                    this.getCommon_sub_action().equals(keyBean.getCommon_sub_action()) &&
+                    this.getCommon_client_ip().equals(keyBean.getCommon_client_ip()) &&
+                    this.getCommon_client_location().equals(keyBean.getCommon_client_location()) &&
+                    this.getCommon_sled_ip().equals(keyBean.getCommon_sled_ip()) &&
+                    this.getCommon_device_id().equals(keyBean.getCommon_device_id()) &&
+                    this.getCommon_subscriber_id().equals(keyBean.getCommon_subscriber_id()) &&
+                    this.getCommon_server_ip().equals(keyBean.getCommon_server_ip()) &&
+                    this.getCommon_server_location().equals(keyBean.getCommon_server_location()) &&
+                    this.getCommon_server_port()==(keyBean.getCommon_server_port()) &&
+                    this.getCommon_l4_protocol().equals(keyBean.getCommon_l4_protocol()) &&
+                    this.getHttp_domain().equals(keyBean.getHttp_domain()) &&
+                    this.getSsl_sni().equals(keyBean.getSsl_sni()));
+        }
+        return false;
     }
 }

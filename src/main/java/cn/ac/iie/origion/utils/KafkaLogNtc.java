@@ -1,4 +1,4 @@
-package cn.ac.iie.trident.aggregate.utils;
+package cn.ac.iie.origion.utils;
 
 
 import org.apache.kafka.clients.producer.*;
@@ -14,6 +14,7 @@ import java.util.Properties;
  */
 
 public class KafkaLogNtc {
+
     private static Logger logger = Logger.getLogger(KafkaLogNtc.class);
 
     /**
@@ -40,15 +41,15 @@ public class KafkaLogNtc {
 
     public void sendMessage(String message) {
         final int[] errorSum = {0};
-            kafkaProducer.send(new ProducerRecord<>(FlowWriteConfig.RESULTS_OUTPUT_TOPIC, message), new Callback() {
-                @Override
-                public void onCompletion(RecordMetadata metadata, Exception exception) {
-                    if (exception != null) {
-                        logger.error("写入" + FlowWriteConfig.RESULTS_OUTPUT_TOPIC + "出现异常", exception);
-                        errorSum[0]++;
-                    }
+        kafkaProducer.send(new ProducerRecord<>(FlowWriteConfig.RESULTS_OUTPUT_TOPIC, message), new Callback() {
+            @Override
+            public void onCompletion(RecordMetadata metadata, Exception exception) {
+                if (exception != null) {
+                    logger.error("写入" + FlowWriteConfig.RESULTS_OUTPUT_TOPIC + "出现异常", exception);
+                    errorSum[0]++;
                 }
-            });
+            }
+        });
 
         kafkaProducer.flush();
         logger.debug("Log sent to National Center successfully!!!!!");
@@ -70,6 +71,5 @@ public class KafkaLogNtc {
         properties.put("compression.type", FlowWriteConfig.KAFKA_COMPRESSION_TYPE);
         kafkaProducer = new KafkaProducer<>(properties);
     }
-
 
 }

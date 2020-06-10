@@ -1,12 +1,6 @@
 package com.wp;
 
-import cn.ac.iie.trident.aggregate.bean.ValueBean;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import cn.ac.iie.trident.aggregate.utils.FlowWriteConfig;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.trident.TridentTopology;

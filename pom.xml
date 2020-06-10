@@ -38,7 +38,7 @@
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>cn.ac.iie.trident.aggregate.topology.LogFlowWriteTopology</mainClass>
+                                    <mainClass>cn.ac.iie.origion.topology.LogFlowWriteTopology</mainClass>
                                 </transformer>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">

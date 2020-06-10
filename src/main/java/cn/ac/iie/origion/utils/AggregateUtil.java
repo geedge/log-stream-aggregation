@@ -1,36 +1,35 @@
-package cn.ac.iie.trident.aggregate;
+package cn.ac.iie.origion.utils;
 
+
+import cn.ac.iie.origion.bean.KeyBean;
+import cn.ac.iie.origion.bean.ValueBean;
 import com.alibaba.fastjson.JSONObject;
-import cn.ac.iie.trident.aggregate.bean.KeyBean;
-import cn.ac.iie.trident.aggregate.bean.ValueBean;
-import org.apache.storm.trident.operation.BaseFunction;
-import org.apache.storm.trident.operation.TridentCollector;
-import org.apache.storm.trident.tuple.TridentTuple;
-import org.apache.storm.tuple.Values;
 
 import java.util.Map;
 
 /**
- * 把一个tuple解析成
- * @ClassNameToJson
+ * @ClassNameAggregateUtil
  * @Author lixkvip@126.com
- * @Date2020/5/29 16:05
+ * @Date2020/6/9 11:44
  * @Version V1.0
  **/
-public class ParseJson2KV extends BaseFunction {
+public class AggregateUtil {
 
 
     private static ValueBean valueBean = new ValueBean();
     private static KeyBean keyBean = new KeyBean();
 
+    /**
+     * 接收到的是一个json字符串，该方法将其解析成 Bean
+     * @param message
+     * @return
+     */
+    public static String aggregate(String message){
 
-
-    @Override
-    public void execute(TridentTuple tuple, TridentCollector collector) {
 
 
         //TODO 获取tuple输入内容,解析成map
-        Map map = JSONObject.parseObject(tuple.getStringByField("str"));
+        Map map = JSONObject.parseObject(message);
 
 
         //TODO KEY
@@ -61,7 +60,7 @@ public class ParseJson2KV extends BaseFunction {
         valueBean.setCommon_sessions(Long.parseLong(map.getOrDefault("common_sessions",0).toString()));
 
 
-        collector.emit(new Values(JSONObject.toJSONString(keyBean), JSONObject.toJSONString(valueBean)));
 
+        return message;
     }
 }

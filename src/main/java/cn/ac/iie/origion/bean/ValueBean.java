@@ -1,4 +1,4 @@
-package cn.ac.iie.trident.aggregate.bean;
+package cn.ac.iie.origion.bean;
 
 import java.io.Serializable;
 
