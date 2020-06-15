@@ -5,8 +5,8 @@ import cn.ac.iie.origion.bean.ValueBean;
 import cn.ac.iie.origion.utils.FlowWriteConfig;
 import cn.ac.iie.origion.utils.TupleUtils;
 
-import com.alibaba.fastjson.JSON;
 import org.apache.log4j.Logger;
+import org.apache.storm.Config;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.BasicOutputCollector;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -23,38 +23,37 @@ public class AggregateBolt extends BaseBasicBolt {
     private final static Logger logger = Logger.getLogger(AggregateBolt.class);
     private static final long serialVersionUID = 9006119186526123734L;
 
-    private static HashMap<String, Integer> map = new HashMap();
-    private static ValueBean valueBean = new ValueBean();
-    private static ValueBean tupleValueBean = new ValueBean();
-    private static String key = "";
-    private static Integer value = 0;
-    private static String message = "";
+    private HashMap<String, ValueBean> map;
+    private String key = "";
+    private ValueBean value;
+    private ValueBean mapValue;
 
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
-        System.out.println("prepare方法执行了++++++++++++++++++++++++++");
-
-        logger.error("prepare方法执行了++++++++++++++++++++++++++");
+        map = new HashMap<>(16);
+        key = "";
+        value = new ValueBean();
+        mapValue = new ValueBean();
     }
 
     @Override
     public void execute(Tuple tuple, BasicOutputCollector basicOutputCollector) {
-
-        System.out.println("执行了一次====================================" + value + "==========================" + System.currentTimeMillis());
         try {
             if (TupleUtils.isTick(tuple)) {
-                System.out.println(this.map);
-                //批量发送到下一个bolt
-                basicOutputCollector.emit(new Values(JSON.toJSONString(this.map)));
-
-
+                //TODO 发送到kafka的 bolt
+                for (String key : map.keySet()) {
+                    basicOutputCollector.emit(new Values(key,map.get(key)));
+                }
+                map.clear();
             } else {
-                message = tuple.getString(0);
                 //TODO 获取一条tuple数据的key和value
-
+                key = tuple.getString(0);
+                value = (ValueBean) tuple.getValue(1);
                 //TODO 两个count聚合后放入HashMap中，利用HashMap的去重功能实现value的覆盖
-                this.map.put("192", addValueBean(value, 1));
+                mapValue = map.getOrDefault(key, new ValueBean());
+                mapValue = addValueBean(mapValue, value);
+                map.put(key, mapValue);
             }
         } catch (Exception e) {
             logger.error(FlowWriteConfig.KAFKA_TOPIC + "接收/解析过程出现异常");
@@ -65,14 +64,15 @@ public class AggregateBolt extends BaseBasicBolt {
     @Override
     public Map<String, Object> getComponentConfiguration() {
         Map<String, Object> conf = new HashMap<String, Object>(16);
-        conf.put(org.apache.storm.Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS, 30);
+        conf.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS, FlowWriteConfig.AGG_TIME);
         return conf;
     }
 
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("connLog"));
+//        outputFieldsDeclarer.declare(new Fields("map"));
+        outputFieldsDeclarer.declare(new Fields("key","value"));
     }
 
     /**
@@ -90,16 +90,10 @@ public class AggregateBolt extends BaseBasicBolt {
         result.setCommon_c2s_byte_num(result.getCommon_c2s_byte_num() + value2.getCommon_c2s_byte_num());
         result.setCommon_s2c_pkt_num(result.getCommon_s2c_pkt_num() + value2.getCommon_s2c_pkt_num());
         result.setCommon_c2s_pkt_num(result.getCommon_c2s_pkt_num() + value2.getCommon_c2s_pkt_num());
-        result.setCommon_sessions(result.getCommon_sessions() + 1L);
+        result.setCommon_sessions(result.getCommon_sessions() + value2.getCommon_sessions());
 
 
         return result;
     }
-
-    public Integer addValueBean(Integer result, Integer value2) {
-
-        return result + value2;
-    }
-
 
 }

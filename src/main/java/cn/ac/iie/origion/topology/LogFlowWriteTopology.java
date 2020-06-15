@@ -1,5 +1,6 @@
 package cn.ac.iie.origion.topology;
 
+import cn.ac.iie.origion.bolt.AggregateBolt;
 import cn.ac.iie.origion.bolt.MyWindowBolt;
 import cn.ac.iie.origion.bolt.NtcLogSendBolt;
 import cn.ac.iie.origion.spout.CustomizedKafkaSpout;
@@ -11,6 +12,7 @@ import org.apache.storm.generated.AuthorizationException;
 import org.apache.storm.generated.InvalidTopologyException;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.topology.base.BaseWindowedBolt;
+import org.apache.storm.tuple.Fields;
 
 import java.util.concurrent.TimeUnit;
 
@@ -41,13 +43,15 @@ public class LogFlowWriteTopology {
         conf.setDebug(false);
         conf.setMessageTimeoutSecs(60);
         conf.setMaxSpoutPending(150000);
-        conf.setNumAckers(3);
+        conf.setNumAckers(FlowWriteConfig.TOPOLOGY_WORKERS);
+//        conf.setTopologyWorkerMaxHeapSize(6144);
+        conf.put(Config.WORKER_CHILDOPTS, "-Xmx4G -Xms2G");
         return conf;
     }
 
     private void runLocally() throws InterruptedException {
         topologyConfig.setMaxTaskParallelism(1);
-        StormRunner.runTopologyLocally(builder, topologyName, topologyConfig, 600);
+        StormRunner.runTopologyLocally(builder, topologyName, topologyConfig, 6000);
     }
 
     private void runRemotely() throws AlreadyAliveException, InvalidTopologyException, AuthorizationException {
@@ -59,15 +63,14 @@ public class LogFlowWriteTopology {
 
     private void buildTopology() {
         builder = new TopologyBuilder();
-        builder.setSpout("LogFlowWriteSpout", new CustomizedKafkaSpout(), 3);
+        builder.setSpout("LogFlowWriteSpout", new CustomizedKafkaSpout(), FlowWriteConfig.SPOUT_PARALLELISM);
         builder.setBolt("TEST-CONN", new MyWindowBolt()
-                .withWindow(new BaseWindowedBolt.Duration(30, TimeUnit.SECONDS),
-                        new BaseWindowedBolt.Duration(30, TimeUnit.SECONDS)),FlowWriteConfig.DATACENTER_BOLT_PARALLELISM)
+                .withWindow(new BaseWindowedBolt.Duration(10, TimeUnit.SECONDS),
+                        new BaseWindowedBolt.Duration(10, TimeUnit.SECONDS)), FlowWriteConfig.DATACENTER_BOLT_PARALLELISM)
                 .localOrShuffleGrouping("LogFlowWriteSpout");
 
-//        builder.setBolt("TEST-CONN", new AggregateBolt(),3).localOrShuffleGrouping("LogFlowWriteSpout");
-//        builder.setBolt("KAKFA-CONN", new PrintBolt(),3).localOrShuffleGrouping("TEST-CONN");
-        builder.setBolt("KAKFA-CONN", new NtcLogSendBolt(),FlowWriteConfig.KAFKA_BOLT_PARALLELISM).localOrShuffleGrouping("TEST-CONN");
+        builder.setBolt("AGG-BOLT", new AggregateBolt(), FlowWriteConfig.DATACENTER_BOLT_PARALLELISM).fieldsGrouping("TEST-CONN", new Fields("key"));
+        builder.setBolt("KAKFA-CONN", new NtcLogSendBolt(), FlowWriteConfig.KAFKA_BOLT_PARALLELISM).localOrShuffleGrouping("AGG-BOLT");
     }
 
     public static void main(String[] args) throws Exception {

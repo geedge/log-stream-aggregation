@@ -8,7 +8,6 @@ package cn.ac.iie.origion.bean;
  **/
 public class KeyBean {
 
-    private long common_recv_time;
     private int common_policy_id;
     private int common_action;
     private String common_sub_action;
@@ -23,14 +22,6 @@ public class KeyBean {
     private String common_l4_protocol;
     private String http_domain;
     private String ssl_sni;
-
-    public long getCommon_recv_time() {
-        return common_recv_time;
-    }
-
-    public void setCommon_recv_time(long common_recv_time) {
-        this.common_recv_time = common_recv_time;
-    }
 
     public int getCommon_policy_id() {
         return common_policy_id;
@@ -147,7 +138,7 @@ public class KeyBean {
     @Override
     public int hashCode() {
 
-        return ("" + getCommon_recv_time() + getCommon_policy_id() + getCommon_action() + getCommon_sub_action() + getCommon_client_ip() + getCommon_client_location() + getCommon_sled_ip() + getCommon_device_id() + getCommon_subscriber_id() + getCommon_server_ip() + getCommon_server_location() + getCommon_server_port() + getCommon_l4_protocol() + getHttp_domain() + getSsl_sni()).hashCode();
+        return ("" + getCommon_policy_id() + getCommon_action() + getCommon_sub_action() + getCommon_client_ip() + getCommon_client_location() + getCommon_sled_ip() + getCommon_device_id() + getCommon_subscriber_id() + getCommon_server_ip() + getCommon_server_location() + getCommon_server_port() + getCommon_l4_protocol() + getHttp_domain() + getSsl_sni()).hashCode();
 
     }
 
@@ -155,8 +146,7 @@ public class KeyBean {
     public boolean equals(Object o) {
         if (o instanceof KeyBean) {
             KeyBean keyBean = (KeyBean) o;
-            return (this.getCommon_recv_time()==(keyBean.getCommon_recv_time()) &&
-                    this.getCommon_policy_id()==(keyBean.getCommon_policy_id()) &&
+            return (this.getCommon_policy_id()==(keyBean.getCommon_policy_id()) &&
                     this.getCommon_action()==(keyBean.getCommon_action()) &&
                     this.getCommon_sub_action().equals(keyBean.getCommon_sub_action()) &&
                     this.getCommon_client_ip().equals(keyBean.getCommon_client_ip()) &&

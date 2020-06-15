@@ -12,7 +12,6 @@ import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 import org.apache.storm.windowing.TupleWindow;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,11 +24,9 @@ import java.util.Map;
 public class MyWindowBolt extends BaseWindowedBolt {
 
 
-    private OutputCollector collector;
-
-    private static ArrayList<Integer> list;
-    private static HashMap<String, ValueBean> map;
-    private static String message;
+    private static OutputCollector collector;
+    private HashMap<String, ValueBean> map;
+    private String message;
 
 
     @Override
@@ -37,13 +34,13 @@ public class MyWindowBolt extends BaseWindowedBolt {
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
         map = new HashMap<>(16);
-        list = new ArrayList<>();
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
 
-        declarer.declare(new Fields("map"));
+        declarer.declare(new Fields("key","value"));
+//        declarer.declare(new Fields("map"));
     }
 
     @Override
@@ -63,11 +60,11 @@ public class MyWindowBolt extends BaseWindowedBolt {
             message = tuple.getStringByField("source");
 
             //TODO 获取Tuple中的value Bean
-            ValueBean valueBean = JSONObject.parseObject(message,ValueBean.class);
+            ValueBean valueBean = JSONObject.parseObject(message, ValueBean.class);
             //TODO 获取Tuple中的key String
             String key = JSONObject.toJSONString(JSONObject.parseObject(message, KeyBean.class));
             //TODO 获取map中的value Bean
-            ValueBean mapValueBean = map.getOrDefault(key,new ValueBean());
+            ValueBean mapValueBean = map.getOrDefault(key, new ValueBean());
             //TODO 将tuple中的value和map中的value做累加
             mapValueBean = addValueBean(mapValueBean, valueBean);
 
@@ -75,7 +72,12 @@ public class MyWindowBolt extends BaseWindowedBolt {
             map.put(key, mapValueBean);
         }
 
-        collector.emit(new Values(map));
+        //TODO 遍历map将 K V发送出去
+        for (String key : map.keySet()) {
+            collector.emit(new Values(key,map.get(key)));
+        }
+//        collector.emit(new Values(map));
+
     }
 
     @SuppressWarnings("all")
@@ -93,8 +95,6 @@ public class MyWindowBolt extends BaseWindowedBolt {
         result.setCommon_s2c_pkt_num(result.getCommon_s2c_pkt_num() + value2.getCommon_s2c_pkt_num());
         result.setCommon_c2s_pkt_num(result.getCommon_c2s_pkt_num() + value2.getCommon_c2s_pkt_num());
         result.setCommon_sessions(result.getCommon_sessions() + 1L);
-
-
         return result;
     }
 

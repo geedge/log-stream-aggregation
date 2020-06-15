@@ -34,7 +34,6 @@ public class AggregateUtil {
 
         //TODO KEY
 
-        keyBean.setCommon_recv_time(0L);
         keyBean.setCommon_policy_id(Integer.parseInt(map.getOrDefault("common_policy_id","0").toString()));
         keyBean.setCommon_action(Integer.parseInt(map.getOrDefault("common_action","0").toString()));
         keyBean.setCommon_sub_action(map.getOrDefault("common_sub_action","").toString());
